@@ -54,8 +54,57 @@ void PTree::Copy(const PTree& other) {
 *  RETURN: pointer to the fully constructed Node
 */
 Node* PTree::BuildNode(PNG& im, pair<unsigned int, unsigned int> ul, unsigned int w, unsigned int h) {
-  // replace the line below with your implementation
-  return nullptr;
+  // recursively construct children
+  unsigned int l_width;
+  unsigned int r_width;
+  unsigned int l_height;
+  unsigned int r_height;
+  pair<unsigned int, unsigned int> l_ul;
+  pair<unsigned int, unsigned int> r_ul;
+  if (w >= h) {
+    l_width = (w / 2);
+    r_width = (w / 2) + (w % 2);
+    l_height = h;
+    r_height = h;
+    l_ul = make_pair(ul.first, ul.second);
+    r_ul = make_pair(ul.first + l_width, ul.second);
+  } else {
+    l_width = w;
+    r_width = w;
+    l_height = (h / 2);
+    r_height = (h / 2) + (h % 2);
+    l_ul = make_pair(ul.first, ul.second);
+    r_ul = make_pair(ul.first, ul.second + l_height);
+  }
+  Node* left = BuildNode(im, l_ul, l_width, l_height);
+  Node* right = BuildNode(im, r_ul, r_width, r_height);
+
+  // average color across designated image region
+  double sumHX = 0;
+  double sumHY = 0;
+  double sumS = 0;
+  double sumL = 0;
+  double sumA = 0;
+  for (int x = ul.first; x < ul.first + w; x++) {
+    for (int y = ul.second; y < ul.second + h; y++) {
+      sumHX += Deg2X(im.getPixel(x, y)->h);
+      sumHY += Deg2Y(im.getPixel(x, y)->h);
+      sumS += im.getPixel(x, y)->s;
+      sumL += im.getPixel(x, y)->l;
+      sumA += im.getPixel(x, y)->a;
+    }
+  }
+  double avgHX = sumHX / (w * h);
+  double avgHY = sumHY / (w * h);
+  double avgH = XY2Deg(avgHX, avgHY);
+  double avgS = sumS / (w * h);
+  double avgL = sumL / (w * h);
+  double avgA = sumA / (w * h);
+  HSLAPixel avgPixel = HSLAPixel(avgH, avgS, avgL, avgA);
+
+  // construct parent
+  Node* curr = new Node(ul, w, h, avgPixel, left, right);
+  return curr;
 }
 
 ////////////////////////////////
@@ -108,8 +157,7 @@ Node* PTree::BuildNode(PNG& im, pair<unsigned int, unsigned int> ul, unsigned in
 *  POST:  The newly constructed tree contains the PNG's pixel data in each leaf node.
 */
 PTree::PTree(PNG& im) {
-  // add your implementation below
-  
+  root = BuildNode(im, make_pair(0, 0), im.height(), im.width());
 }
 
 /*
