@@ -54,6 +54,13 @@ void PTree::Copy(const PTree& other) {
 *  RETURN: pointer to the fully constructed Node
 */
 Node* PTree::BuildNode(PNG& im, pair<unsigned int, unsigned int> ul, unsigned int w, unsigned int h) {
+  // terminate at base case
+  if (w == 1 && h == 1) {
+    // average colors
+    Node* leaf = new Node(ul, w, h, *im.getPixel(ul.first, ul.second), nullptr, nullptr);
+    return leaf;
+  }
+
   // recursively construct children
   unsigned int l_width;
   unsigned int r_width;
