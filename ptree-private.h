@@ -34,4 +34,6 @@ int CountNodes(Node* root) const;
 
 int CountLeaves(Node* root) const;
 
+void InvertTree(Node* node);
+
 #endif

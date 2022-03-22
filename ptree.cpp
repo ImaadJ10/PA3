@@ -275,8 +275,7 @@ int PTree::NumLeaves() const {
 *  POST: Tree has been modified so that a rendered PNG will be flipped horizontally.
 */
 void PTree::FlipHorizontal() {
-  // add your implementation below
-  
+  InvertTree(root);
 }
 
 /*
@@ -425,4 +424,17 @@ int PTree::CountLeaves(Node* root) const {
   } else {
     return CountLeaves(root->A) + CountLeaves(root->B);
   }
+}
+
+void PTree::InvertTree(Node* node) {
+  if (node == NULL) {
+    return;
+  }
+
+  Node* temp = node->A;
+  node->A = node->B;
+  node->B = temp;
+
+  InvertTree(node->A);
+  InvertTree(node->B);
 }
