@@ -242,8 +242,7 @@ PNG PTree::Render() const {
 *        Each pruned subtree's root becomes a leaf node.
 */
 void PTree::Prune(double tolerance) {
-  // add your implementation below
-  
+  PruneSubtree(root, tolerance);
 }
 
 /*
@@ -309,6 +308,46 @@ Node* PTree::GetRoot() {
 //////////////////////////////////////////////
 // PERSONALLY DEFINED PRIVATE MEMBER FUNCTIONS
 //////////////////////////////////////////////
+bool Prunable(Node* node, double tolerance) {
+  if (node == NULL) {
+    return true;
+  }
+
+  if (node->avg.dist(node->avg) <= tolerance) {
+    return true && Prunable(node->A, tolerance) && Prunable(node->B, tolerance);
+  } else {
+    return false;
+  }
+}
+
+void PruneSubtree(Node* root, double tolerance) {
+  if (root == NULL) {
+    return;
+  }
+
+  if (Prunable(root, tolerance)) {
+    PruneNodes(root->A);
+    PruneNodes(root->B);
+  } else {
+    PruneSubtree(root->A, tolerance);
+    PruneSubtree(root->B, tolerance);
+  }
+}
+
+void PruneNodes(Node* node) {
+  if (node == NULL) {
+    return;
+  }
+
+  if (node->A != NULL || node->B != NULL) {
+    PruneNodes(node->A);
+    PruneNodes(node->B);
+  }
+
+  free(node);
+  node = NULL;
+}
+
 void ColorImage(PNG& img, Node* root) {
   if (root == NULL) {
     return;
