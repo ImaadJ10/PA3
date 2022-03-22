@@ -25,8 +25,7 @@ typedef pair<unsigned int, unsigned int> pairUI;
 *  POST: all nodes allocated into the heap have been released.
 */
 void PTree::Clear() {
-  // add your implementation below
-  
+  Clear(root);
 }
 
 /*
@@ -38,8 +37,8 @@ void PTree::Clear() {
 *  POST:  This PTree is a physically separate copy of the other PTree.
 */
 void PTree::Copy(const PTree& other) {
-  // add your implementation below
-  
+  root = new Node();
+  Copy(other, root, other.root);
 }
 
 /*
@@ -56,35 +55,34 @@ void PTree::Copy(const PTree& other) {
 Node* PTree::BuildNode(PNG& im, pair<unsigned int, unsigned int> ul, unsigned int w, unsigned int h) {
   // terminate at base case
   if (w == 1 && h == 1) {
-    // average colors
     Node* leaf = new Node(ul, w, h, *im.getPixel(ul.first, ul.second), nullptr, nullptr);
     return leaf;
   }
 
   // recursively construct children
-  unsigned int l_width;
-  unsigned int r_width;
-  unsigned int l_height;
-  unsigned int r_height;
-  pair<unsigned int, unsigned int> l_ul;
-  pair<unsigned int, unsigned int> r_ul;
+  unsigned int width_A;
+  unsigned int width_B;
+  unsigned int height_A;
+  unsigned int height_B;
+  pair<unsigned int, unsigned int> ul_A;
+  pair<unsigned int, unsigned int> ul_B;
   if (w >= h) {
-    l_width = (w / 2);
-    r_width = (w / 2) + (w % 2);
-    l_height = h;
-    r_height = h;
-    l_ul = make_pair(ul.first, ul.second);
-    r_ul = make_pair(ul.first + l_width, ul.second);
+    width_A = (w / 2);
+    width_B = (w / 2) + (w % 2);
+    height_A = h;
+    height_B = h;
+    ul_A = make_pair(ul.first, ul.second);
+    ul_B = make_pair(ul.first + width_A, ul.second);
   } else {
-    l_width = w;
-    r_width = w;
-    l_height = (h / 2);
-    r_height = (h / 2) + (h % 2);
-    l_ul = make_pair(ul.first, ul.second);
-    r_ul = make_pair(ul.first, ul.second + l_height);
+    width_A = w;
+    width_B = w;
+    height_A = (h / 2);
+    height_B = (h / 2) + (h % 2);
+    ul_A = make_pair(ul.first, ul.second);
+    ul_B = make_pair(ul.first, ul.second + height_A);
   }
-  Node* left = BuildNode(im, l_ul, l_width, l_height);
-  Node* right = BuildNode(im, r_ul, r_width, r_height);
+  Node* left = BuildNode(im, ul_A, width_A, height_A);
+  Node* right = BuildNode(im, ul_B, width_B, height_B);
 
   // average color across designated image region
   double sumHX = 0;
@@ -175,8 +173,7 @@ PTree::PTree(PNG& im) {
 *  POST:  This tree is constructed as a physically separate copy of other tree.
 */
 PTree::PTree(const PTree& other) {
-  // add your implementation below
-  
+  Copy(other);
 }
 
 /*
@@ -190,8 +187,10 @@ PTree::PTree(const PTree& other) {
 *         Otherwise, there is no change to this tree.
 */
 PTree& PTree::operator=(const PTree& other) {
-  // add your implementation below
-
+  if (this != &other) {
+    Clear();
+    Copy(other);
+  }
   return *this;
 }
 
@@ -200,8 +199,7 @@ PTree& PTree::operator=(const PTree& other) {
 *  Deallocates all dynamic memory associated with the tree and destroys this PTree object.
 */
 PTree::~PTree() {
-  // add your implementation below
-  
+  Clear();
 }
 
 /*
@@ -307,3 +305,47 @@ Node* PTree::GetRoot() {
 // PERSONALLY DEFINED PRIVATE MEMBER FUNCTIONS
 //////////////////////////////////////////////
 
+void PTree::Clear(Node* curr) {
+  if (curr->A == NULL && curr->B == NULL) {
+    delete curr;
+    return;
+  } else if (curr->A == NULL) {
+    Clear(curr->B);
+    delete curr;
+    return;
+  } else if (curr->B == NULL) {
+    Clear(curr->A);
+    delete curr;
+    return;
+  } else {
+    Clear(curr->A);
+    Clear(curr->B);
+    delete curr;
+    return;
+  }
+}
+
+void PTree::Copy(const PTree& other, Node* curr, Node* other_curr) {
+  curr->upperleft = other_curr->upperleft;
+  curr->width = other_curr->width;
+  curr->height = other_curr->height;
+  curr->avg = other_curr->avg;
+
+  if (other_curr->A == NULL && other_curr->B == NULL) {
+    curr->A = NULL;
+    curr->B = NULL;
+  } else if (other_curr->A == NULL) {
+    curr->A = NULL;
+    curr->B = new Node();
+    Copy(other, curr->B, other_curr->B);
+  } else if (other_curr->B == NULL) {
+    curr->A = new Node();
+    curr->B = NULL;
+    Copy(other, curr->A, other_curr->A);
+  } else {
+    curr->A = new Node();
+    curr->B = new Node();
+    Copy(other, curr->A, other_curr->A);
+    Copy(other, curr->B, other_curr->B);
+  }
+}

@@ -20,6 +20,8 @@
 //
 /////////////////////////////////////////////////
 
+void Clear(Node* curr);
 
+void Copy(const PTree& other, Node* curr, Node* other_curr);
 
 #endif
