@@ -20,4 +20,14 @@
 //
 /////////////////////////////////////////////////
 
+void Clear(Node* curr);
+
+void Copy(const PTree& other, Node* curr, Node* other_curr);
+
+bool Prunable(Node* node, double tolerance);
+
+void PruneNodes(Node* node);
+
+void PruneSubtree(Node* root, double tolerance);
+
 #endif

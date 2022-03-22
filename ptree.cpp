@@ -214,8 +214,13 @@ PTree::~PTree() {
 *  RETURN: A PNG image of appropriate dimensions and coloured using the tree's leaf node colour data
 */
 PNG PTree::Render() const {
-  // replace the line below with your implementation
-  return PNG();
+  unsigned int img_width = root->width;
+  unsigned int img_height = root->height;
+  PNG img = PNG(img_width, img_height);
+
+  ColorImage(img, root);
+
+  return img;
 }
 
 /*
@@ -235,8 +240,7 @@ PNG PTree::Render() const {
 *        Each pruned subtree's root becomes a leaf node.
 */
 void PTree::Prune(double tolerance) {
-  // add your implementation below
-  
+  PruneSubtree(root, tolerance);
 }
 
 /*
@@ -246,8 +250,7 @@ void PTree::Prune(double tolerance) {
 *  You may want to add a recursive helper function for this!
 */
 int PTree::Size() const {
-  // replace the line below with your implementation
-  return -1;
+  return CountNodes(root);
 }
 
 /*
@@ -257,8 +260,7 @@ int PTree::Size() const {
 *  You may want to add a recursive helper function for this!
 */
 int PTree::NumLeaves() const {
-  // replace the line below with your implementation
-  return -1;
+  return CountLeaves(root);
 }
 
 /*
@@ -304,3 +306,130 @@ Node* PTree::GetRoot() {
 //////////////////////////////////////////////
 // PERSONALLY DEFINED PRIVATE MEMBER FUNCTIONS
 //////////////////////////////////////////////
+
+void PTree::Clear(Node* curr) {
+  if (curr->A == NULL && curr->B == NULL) {
+    delete curr;
+    return;
+  } else if (curr->A == NULL) {
+    Clear(curr->B);
+    delete curr;
+    return;
+  } else if (curr->B == NULL) {
+    Clear(curr->A);
+    delete curr;
+    return;
+  } else {
+    Clear(curr->A);
+    Clear(curr->B);
+    delete curr;
+    return;
+  }
+}
+
+void PTree::Copy(const PTree& other, Node* curr, Node* other_curr) {
+  curr->upperleft = other_curr->upperleft;
+  curr->width = other_curr->width;
+  curr->height = other_curr->height;
+  curr->avg = other_curr->avg;
+
+  if (other_curr->A == NULL && other_curr->B == NULL) {
+    curr->A = NULL;
+    curr->B = NULL;
+  } else if (other_curr->A == NULL) {
+    curr->A = NULL;
+    curr->B = new Node();
+    Copy(other, curr->B, other_curr->B);
+  } else if (other_curr->B == NULL) {
+    curr->A = new Node();
+    curr->B = NULL;
+    Copy(other, curr->A, other_curr->A);
+  } else {
+    curr->A = new Node();
+    curr->B = new Node();
+    Copy(other, curr->A, other_curr->A);
+    Copy(other, curr->B, other_curr->B);
+  }
+}
+
+bool PTree::Prunable(Node* node, double tolerance) {
+  if (node == NULL) {
+    return true;
+  }
+
+  if (node->avg.dist(node->avg) <= tolerance) {
+    return true && Prunable(node->A, tolerance) && Prunable(node->B, tolerance);
+  } else {
+    return false;
+  }
+}
+
+void PTree::PruneNodes(Node* node) {
+  if (node == NULL) {
+    return;
+  }
+
+  if (node->A != NULL || node->B != NULL) {
+    PruneNodes(node->A);
+    PruneNodes(node->B);
+  }
+
+  free(node);
+  node = NULL;
+}
+
+void PTree::PruneSubtree(Node* root, double tolerance) {
+  if (root == NULL) {
+    return;
+  }
+
+  if (Prunable(root, tolerance)) {
+    PruneNodes(root->A);
+    PruneNodes(root->B);
+  } else {
+    PruneSubtree(root->A, tolerance);
+    PruneSubtree(root->B, tolerance);
+  }
+}
+
+void ColorImage(PNG& img, Node* root) {
+  if (root == NULL) {
+    return;
+  }
+   // POTENTIALLY WILL HAVE TO CHECK IF THIS GOES OVER WIDTH OR HEIGHT PROBABLY SHOULDNT THO
+  if (root->A == NULL && root->B == NULL) {
+    for (int i = 0; i < root->width; i++) {
+      HSLAPixel* currPixel = img.getPixel(root->upperleft.first + i, root->upperleft.second);
+      *currPixel = root->avg;
+    }
+  
+    for (int i = 0; i < root->height; i++) {
+      HSLAPixel* currPizel = img.getPixel(root->upperleft.first, root->upperleft.second + i);
+      *currPizel = root->avg;
+    }
+  }
+
+  ColorImage(img, root->A);
+  ColorImage(img, root->B);
+
+}
+
+int CountNodes(Node* root) {
+  if (root == NULL) {
+    return 0;
+  } else {
+    return 1 + CountNodes(root->A) + CountNodes(root->B);
+  }
+}
+
+int CountLeaves(Node* root) {
+  if (root == NULL) {
+    return 0;
+  }
+
+  if (root->A == NULL && root->B == NULL) {
+    return 1;
+  } else {
+    return CountLeaves(root->A) + CountLeaves(root->B);
+  }
+}
