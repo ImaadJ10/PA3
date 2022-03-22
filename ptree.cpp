@@ -354,7 +354,7 @@ void FlipHorizontal(Node* curr) {
   if (curr == NULL) {
     return;
   } else {
-    if (curr.width >= curr.height) {
+    if (curr->width >= curr->height) {
       Node* temp = curr->A;
       curr->A = curr->B;
       curr->B = curr->A;
@@ -368,7 +368,7 @@ void FlipVertical(Node* curr) {
   if (curr == NULL) {
     return;
   } else {
-    if (curr.height > curr.width) {
+    if (curr->height > curr->width) {
       Node* temp = curr->A;
       curr->A = curr->B;
       curr->B = curr->A;
@@ -452,4 +452,3 @@ bool PTree::Prunable(HSLAPixel rootAvg, Node* node, double tolerance) {
 
   return true;
 }
-
