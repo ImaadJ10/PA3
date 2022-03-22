@@ -24,9 +24,9 @@ void Clear(Node* curr);
 
 void Copy(const PTree& other, Node* curr, Node* other_curr);
 
-bool Prunable(HSLAPixel rootAvg, Node* node, double tolerance);
+void FlipHorizontal(Node* curr);
 
-void PruneSubtree(Node* node, double tolerance);
+void FlipVertical(Node* curr);
 
 void ColorImage(PNG& img, Node* root) const;
 
@@ -34,6 +34,10 @@ int CountNodes(Node* root) const;
 
 int CountLeaves(Node* root) const;
 
-void InvertTree(Node* node);
+//TODO
+void PruneSubtree(Node* root, double tolerance);
+
+//TODO
+bool Prunable(Node* node, double tolerance);
 
 #endif
