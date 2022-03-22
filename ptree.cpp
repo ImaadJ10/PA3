@@ -349,7 +349,7 @@ void PTree::FlipHorizontal(Node* curr) {
     if (curr->width >= curr->height) {
       Node* temp = curr->A;
       curr->A = curr->B;
-      curr->B = curr->A;
+      curr->B = temp;
     }
     FlipHorizontal(curr->A);
     FlipHorizontal(curr->B);
@@ -363,7 +363,7 @@ void PTree::FlipVertical(Node* curr) {
     if (curr->height > curr->width) {
       Node* temp = curr->A;
       curr->A = curr->B;
-      curr->B = curr->A;
+      curr->B = temp;
     }
     FlipVertical(curr->A);
     FlipVertical(curr->B);
