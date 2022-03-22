@@ -390,7 +390,7 @@ void PTree::PruneSubtree(Node* root, double tolerance) {
   }
 }
 
-void PTree::ColorImage(PNG& img, Node* root) const {
+void PTree::ColorImage(PNG& img, Node* root) {
   if (root == NULL) {
     return;
   }
@@ -412,7 +412,7 @@ void PTree::ColorImage(PNG& img, Node* root) const {
 
 }
 
-int PTree::CountNodes(Node* root) const {
+int PTree::CountNodes(Node* root) {
   if (root == NULL) {
     return 0;
   } else {
@@ -420,7 +420,7 @@ int PTree::CountNodes(Node* root) const {
   }
 }
 
-int PTree::CountLeaves(Node* root) const {
+int PTree::CountLeaves(Node* root) {
   if (root == NULL) {
     return 0;
   }
