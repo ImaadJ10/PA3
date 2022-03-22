@@ -24,11 +24,9 @@ void Clear(Node* curr);
 
 void Copy(const PTree& other, Node* curr, Node* other_curr);
 
-bool Prunable(Node* node, double tolerance);
+bool Prunable(HSLAPixel rootAvg, Node* node, double tolerance);
 
-void PruneNodes(Node* node);
-
-void PruneSubtree(Node* root, double tolerance);
+void PruneSubtree(Node* node, double tolerance);
 
 void ColorImage(PNG& img, Node* root) const;
 

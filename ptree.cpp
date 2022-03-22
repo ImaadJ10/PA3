@@ -162,7 +162,7 @@ Node* PTree::BuildNode(PNG& im, pair<unsigned int, unsigned int> ul, unsigned in
 *  POST:  The newly constructed tree contains the PNG's pixel data in each leaf node.
 */
 PTree::PTree(PNG& im) {
-  root = BuildNode(im, make_pair(0, 0), im.height(), im.width());
+  root = BuildNode(im, make_pair(0, 0), im.width(), im.height());
 }
 
 /*
@@ -352,43 +352,36 @@ void PTree::Copy(const PTree& other, Node* curr, Node* other_curr) {
   }
 }
 
-bool PTree::Prunable(Node* node, double tolerance) {
+bool PTree::Prunable(HSLAPixel rootAvg, Node* node, double tolerance) {
   if (node == NULL) {
     return true;
   }
 
-  if (node->avg.dist(node->avg) <= tolerance) {
-    return true && Prunable(node->A, tolerance) && Prunable(node->B, tolerance);
-  } else {
+  if (node->A != NULL && rootAvg.dist(node->A->avg) > tolerance) {
     return false;
   }
+
+  if (node->B != NULL && rootAvg.dist(node->B->avg) > tolerance) {
+    return false;
+  }
+
+  if (!Prunable(rootAvg, node->A, tolerance) || !Prunable(rootAvg, node->B, tolerance)) {
+    return false;
+  }
+
+  return true;
 }
 
-void PTree::PruneNodes(Node* node) {
+void PTree::PruneSubtree(Node* node, double tolerance) {
   if (node == NULL) {
     return;
   }
 
-  if (node->A != NULL || node->B != NULL) {
-    PruneNodes(node->A);
-    PruneNodes(node->B);
-  }
-
-  free(node);
-  node = NULL;
-}
-
-void PTree::PruneSubtree(Node* root, double tolerance) {
-  if (root == NULL) {
-    return;
-  }
-
-  if (Prunable(root, tolerance)) {
-    PruneNodes(root->A);
-    PruneNodes(root->B);
+  if (Prunable(node->avg, node, tolerance)) {
+    // Need to figure this function out
   } else {
-    PruneSubtree(root->A, tolerance);
-    PruneSubtree(root->B, tolerance);
+    PruneSubtree(node->A, tolerance);
+    PruneSubtree(node->B, tolerance);
   }
 }
 
@@ -396,7 +389,7 @@ void PTree::ColorImage(PNG& img, Node* root) const {
   if (root == NULL) {
     return;
   }
-   // POTENTIALLY WILL HAVE TO CHECK IF THIS GOES OVER WIDTH OR HEIGHT PROBABLY SHOULDNT THO
+   
   if (root->A == NULL && root->B == NULL) {
     for (unsigned int i = 0; i < root->width; i++) {
       HSLAPixel* currPixel = img.getPixel(root->upperleft.first + i, root->upperleft.second);
