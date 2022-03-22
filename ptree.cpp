@@ -216,8 +216,13 @@ PTree::~PTree() {
 *  RETURN: A PNG image of appropriate dimensions and coloured using the tree's leaf node colour data
 */
 PNG PTree::Render() const {
-  // replace the line below with your implementation
-  return PNG();
+  unsigned int img_width = root->width;
+  unsigned int img_height = root->height;
+  PNG img = PNG(img_width, img_height);
+
+  RenderNode(img, root);
+
+  return img;
 }
 
 /*
@@ -306,4 +311,24 @@ Node* PTree::GetRoot() {
 //////////////////////////////////////////////
 // PERSONALLY DEFINED PRIVATE MEMBER FUNCTIONS
 //////////////////////////////////////////////
+void RenderNode(PNG& img, Node* root) {
+  if (root == NULL) {
+    return;
+  }
 
+  if (root->A != NULL && root->B != NULL) {
+    for (int i = 0; i < root->width; i++) {
+      HSLAPixel* currPixel = img.getPixel(root->upperleft.first + i, root->upperleft.second);
+      *currPixel = root->avg;
+    }
+
+    for (int i = 0; i < root->height; i++) {
+      HSLAPixel* currPizel = img.getPixel(root->upperleft.first, root->upperleft.second + i);
+      *currPizel = root->avg;
+    }
+  }
+
+  RenderNode(img, root->A);
+  RenderNode(img, root->B);
+
+}
