@@ -308,7 +308,7 @@ Node* PTree::GetRoot() {
 //////////////////////////////////////////////
 // PERSONALLY DEFINED PRIVATE MEMBER FUNCTIONS
 //////////////////////////////////////////////
-bool Prunable(Node* node, double tolerance) {
+bool PTree::Prunable(Node* node, double tolerance) {
   if (node == NULL) {
     return true;
   }
@@ -320,21 +320,7 @@ bool Prunable(Node* node, double tolerance) {
   }
 }
 
-void PruneSubtree(Node* root, double tolerance) {
-  if (root == NULL) {
-    return;
-  }
-
-  if (Prunable(root, tolerance)) {
-    PruneNodes(root->A);
-    PruneNodes(root->B);
-  } else {
-    PruneSubtree(root->A, tolerance);
-    PruneSubtree(root->B, tolerance);
-  }
-}
-
-void PruneNodes(Node* node) {
+void PTree::PruneNodes(Node* node) {
   if (node == NULL) {
     return;
   }
@@ -348,7 +334,21 @@ void PruneNodes(Node* node) {
   node = NULL;
 }
 
-void ColorImage(PNG& img, Node* root) {
+void PTree::PruneSubtree(Node* root, double tolerance) {
+  if (root == NULL) {
+    return;
+  }
+
+  if (Prunable(root, tolerance)) {
+    PruneNodes(root->A);
+    PruneNodes(root->B);
+  } else {
+    PruneSubtree(root->A, tolerance);
+    PruneSubtree(root->B, tolerance);
+  }
+}
+
+void PTree::ColorImage(PNG& img, Node* root) const {
   if (root == NULL) {
     return;
   }
@@ -370,7 +370,7 @@ void ColorImage(PNG& img, Node* root) {
 
 }
 
-int CountNodes(Node* root) {
+int PTree::CountNodes(Node* root) const {
   if (root == NULL) {
     return 0;
   } else {
@@ -378,7 +378,7 @@ int CountNodes(Node* root) {
   }
 }
 
-int CountLeaves(Node* root) {
+int PTree::CountLeaves(Node* root) const {
   if (root == NULL) {
     return 0;
   }

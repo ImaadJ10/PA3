@@ -19,7 +19,17 @@
 // Node* MyHelperFunction(int arg_a, bool arg_b);
 //
 /////////////////////////////////////////////////
+bool Prunable(Node* node, double tolerance);
 
+void PruneNodes(Node* node);
+
+void PruneSubtree(Node* root, double tolerance);
+
+void ColorImage(PNG& img, Node* root) const;
+
+int CountNodes(Node* root) const;
+
+int CountLeaves(Node* root) const;
 
 
 #endif
