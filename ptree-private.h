@@ -34,10 +34,8 @@ int CountNodes(Node* root) const;
 
 int CountLeaves(Node* root) const;
 
-//TODO
 bool Prunable(HSLAPixel rootAvg, Node* node, double tolerance);
 
-//TODO
 void PruneSubtree(Node* node, double tolerance);
 
 #endif

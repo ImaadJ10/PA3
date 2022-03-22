@@ -26,6 +26,7 @@ typedef pair<unsigned int, unsigned int> pairUI;
 */
 void PTree::Clear() {
   Clear(root);
+  root = NULL;
 }
 
 /*
@@ -306,23 +307,14 @@ Node* PTree::GetRoot() {
 //////////////////////////////////////////////
 
 void PTree::Clear(Node* curr) {
-  if (curr->A == NULL && curr->B == NULL) {
-    delete curr;
-    return;
-  } else if (curr->A == NULL) {
-    Clear(curr->B);
-    delete curr;
-    return;
-  } else if (curr->B == NULL) {
-    Clear(curr->A);
-    delete curr;
-    return;
-  } else {
-    Clear(curr->A);
-    Clear(curr->B);
-    delete curr;
+  if (curr == NULL) {
     return;
   }
+
+  Clear(curr->A);
+  Clear(curr->B);
+
+  delete curr;
 }
 
 void PTree::Copy(const PTree& other, Node* curr, Node* other_curr) {
@@ -350,7 +342,7 @@ void PTree::Copy(const PTree& other, Node* curr, Node* other_curr) {
   }
 }
 
-void FlipHorizontal(Node* curr) {
+void PTree::FlipHorizontal(Node* curr) {
   if (curr == NULL) {
     return;
   } else {
@@ -364,7 +356,7 @@ void FlipHorizontal(Node* curr) {
   }
 }
 
-void FlipVertical(Node* curr) {
+void PTree::FlipVertical(Node* curr) {
   if (curr == NULL) {
     return;
   } else {
@@ -384,13 +376,10 @@ void PTree::ColorImage(PNG& img, Node* root) const {
   }
   if (root->A == NULL && root->B == NULL) {
     for (unsigned int i = 0; i < root->width; i++) {
-      HSLAPixel* currPixel = img.getPixel(root->upperleft.first + i, root->upperleft.second);
-      *currPixel = root->avg;
-    }
-  
-    for (unsigned int i = 0; i < root->height; i++) {
-      HSLAPixel* currPizel = img.getPixel(root->upperleft.first, root->upperleft.second + i);
-      *currPizel = root->avg;
+      for (unsigned int j = 0; j < root->height; j++) {
+        HSLAPixel* currPixel = img.getPixel(root->upperleft.first + i, root->upperleft.second + j);
+        *currPixel = root->avg;
+      }
     }
   }
 
@@ -418,37 +407,31 @@ int PTree::CountLeaves(Node* root) const {
   }
 }
 
-// TODO
+bool PTree::Prunable(HSLAPixel rootAvg, Node* node, double tolerance) {
+  if (node == NULL) {
+    return true;
+  }
+
+  if (node->A != NULL && node->B != NULL) {
+    return (rootAvg.dist(node->A->avg) <= tolerance) && (rootAvg.dist(node->B->avg) <= tolerance) && Prunable(rootAvg, node->A, tolerance) && Prunable(rootAvg, node->B, tolerance);
+  } else {
+    return true;
+  }
+}
+
 void PTree::PruneSubtree(Node* node, double tolerance) {
   if (node == NULL) {
     return;
   }
   
   if (Prunable(node->avg, node, tolerance)) {
-    // Need to figure this function out
+    Clear(node->A);
+    node->A = NULL;
+    Clear(node->B);
+    node->B = NULL;
   } else {
-    PruneSubtree(node->A, tolerance);
     PruneSubtree(node->B, tolerance);
+    PruneSubtree(node->A, tolerance);
   }
 }
 
-// TODO
-bool PTree::Prunable(HSLAPixel rootAvg, Node* node, double tolerance) {
-  if (node == NULL) {
-    return true;
-  }
-
-  if (node->A != NULL && rootAvg.dist(node->A->avg) > tolerance) {
-    return false;
-  }
-
-  if (node->B != NULL && rootAvg.dist(node->B->avg) > tolerance) {
-    return false;
-  }
-
-  if (!Prunable(rootAvg, node->A, tolerance) || !Prunable(rootAvg, node->B, tolerance)) {
-    return false;
-  }
-
-  return true;
-}
