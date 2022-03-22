@@ -162,7 +162,7 @@ Node* PTree::BuildNode(PNG& im, pair<unsigned int, unsigned int> ul, unsigned in
 *  POST:  The newly constructed tree contains the PNG's pixel data in each leaf node.
 */
 PTree::PTree(PNG& im) {
-  root = BuildNode(im, make_pair(0, 0), im.height(), im.width());
+  root = BuildNode(im, make_pair(0, 0), im.width(), im.height());
 }
 
 /*
@@ -275,8 +275,7 @@ int PTree::NumLeaves() const {
 *  POST: Tree has been modified so that a rendered PNG will be flipped horizontally.
 */
 void PTree::FlipHorizontal() {
-  // add your implementation below
-  
+  FlipHorizontal(root);
 }
 
 /*
@@ -291,8 +290,7 @@ void PTree::FlipHorizontal() {
 *  POST: Tree has been modified so that a rendered PNG will be flipped vertically.
 */
 void PTree::FlipVertical() {
-  // add your implementation below
-  
+  FlipVertical(root);
 }
 
 /*
@@ -352,43 +350,31 @@ void PTree::Copy(const PTree& other, Node* curr, Node* other_curr) {
   }
 }
 
-bool PTree::Prunable(Node* node, double tolerance) {
-  if (node == NULL) {
-    return true;
-  }
-
-  if (node->avg.dist(node->avg) <= tolerance) {
-    return true && Prunable(node->A, tolerance) && Prunable(node->B, tolerance);
+void FlipHorizontal(Node* curr) {
+  if (curr == NULL) {
+    return;
   } else {
-    return false;
+    if (curr.width >= curr.height) {
+      Node* temp = curr->A;
+      curr->A = curr->B;
+      curr->B = curr->A;
+    }
+    FlipHorizontal(curr->A);
+    FlipHorizontal(curr->B);
   }
 }
 
-void PTree::PruneNodes(Node* node) {
-  if (node == NULL) {
+void FlipVertical(Node* curr) {
+  if (curr == NULL) {
     return;
-  }
-
-  if (node->A != NULL || node->B != NULL) {
-    PruneNodes(node->A);
-    PruneNodes(node->B);
-  }
-
-  free(node);
-  node = NULL;
-}
-
-void PTree::PruneSubtree(Node* root, double tolerance) {
-  if (root == NULL) {
-    return;
-  }
-
-  if (Prunable(root, tolerance)) {
-    PruneNodes(root->A);
-    PruneNodes(root->B);
   } else {
-    PruneSubtree(root->A, tolerance);
-    PruneSubtree(root->B, tolerance);
+    if (curr.height > curr.width) {
+      Node* temp = curr->A;
+      curr->A = curr->B;
+      curr->B = curr->A;
+    }
+    FlipVertical(curr->A);
+    FlipVertical(curr->B);
   }
 }
 
@@ -396,7 +382,6 @@ void PTree::ColorImage(PNG& img, Node* root) const {
   if (root == NULL) {
     return;
   }
-   // POTENTIALLY WILL HAVE TO CHECK IF THIS GOES OVER WIDTH OR HEIGHT PROBABLY SHOULDNT THO
   if (root->A == NULL && root->B == NULL) {
     for (unsigned int i = 0; i < root->width; i++) {
       HSLAPixel* currPixel = img.getPixel(root->upperleft.first + i, root->upperleft.second);
@@ -411,7 +396,6 @@ void PTree::ColorImage(PNG& img, Node* root) const {
 
   ColorImage(img, root->A);
   ColorImage(img, root->B);
-
 }
 
 int PTree::CountNodes(Node* root) const {
@@ -432,4 +416,47 @@ int PTree::CountLeaves(Node* root) const {
   } else {
     return CountLeaves(root->A) + CountLeaves(root->B);
   }
+}
+
+//TODO
+void PTree::PruneSubtree(Node* root, double tolerance) {
+  if (root == NULL) {
+    return;
+  }
+
+  if (Prunable(root, tolerance)) {
+    PruneNodes(root->A);
+    PruneNodes(root->B);
+  } else {
+    PruneSubtree(root->A, tolerance);
+    PruneSubtree(root->B, tolerance);
+  }
+}
+
+// TODO
+bool PTree::Prunable(Node* node, double tolerance) {
+  if (node == NULL) {
+    return true;
+  }
+
+  if (node->avg.dist(node->avg) <= tolerance) {
+    return true && Prunable(node->A, tolerance) && Prunable(node->B, tolerance);
+  } else {
+    return false;
+  }
+}
+
+// TODO
+void PTree::PruneNodes(Node* node) {
+  if (node == NULL) {
+    return;
+  }
+
+  if (node->A != NULL || node->B != NULL) {
+    PruneNodes(node->A);
+    PruneNodes(node->B);
+  }
+
+  free(node);
+  node = NULL;
 }

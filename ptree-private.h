@@ -24,16 +24,23 @@ void Clear(Node* curr);
 
 void Copy(const PTree& other, Node* curr, Node* other_curr);
 
-bool Prunable(Node* node, double tolerance);
+void FlipHorizontal(Node* curr);
 
-void PruneNodes(Node* node);
-
-void PruneSubtree(Node* root, double tolerance);
+void FlipVertical(Node* curr);
 
 void ColorImage(PNG& img, Node* root) const;
 
 int CountNodes(Node* root) const;
 
 int CountLeaves(Node* root) const;
+
+//TODO
+void PruneSubtree(Node* root, double tolerance);
+
+//TODO
+bool Prunable(Node* node, double tolerance);
+
+//TODO
+void PruneNodes(Node* node);
 
 #endif
