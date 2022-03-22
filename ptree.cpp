@@ -220,7 +220,7 @@ PNG PTree::Render() const {
   unsigned int img_height = root->height;
   PNG img = PNG(img_width, img_height);
 
-  RenderNode(img, root);
+  ColorImage(img, root);
 
   return img;
 }
@@ -253,8 +253,7 @@ void PTree::Prune(double tolerance) {
 *  You may want to add a recursive helper function for this!
 */
 int PTree::Size() const {
-  // replace the line below with your implementation
-  return -1;
+  return CountNodes(root);
 }
 
 /*
@@ -264,8 +263,7 @@ int PTree::Size() const {
 *  You may want to add a recursive helper function for this!
 */
 int PTree::NumLeaves() const {
-  // replace the line below with your implementation
-  return -1;
+  return CountLeaves(root);
 }
 
 /*
@@ -311,24 +309,44 @@ Node* PTree::GetRoot() {
 //////////////////////////////////////////////
 // PERSONALLY DEFINED PRIVATE MEMBER FUNCTIONS
 //////////////////////////////////////////////
-void RenderNode(PNG& img, Node* root) {
+void ColorImage(PNG& img, Node* root) {
   if (root == NULL) {
     return;
   }
-
-  if (root->A != NULL && root->B != NULL) {
+   // POTENTIALLY WILL HAVE TO CHECK IF THIS GOES OVER WIDTH OR HEIGHT PROBABLY SHOULDNT THO
+  if (root->A == NULL && root->B == NULL) {
     for (int i = 0; i < root->width; i++) {
       HSLAPixel* currPixel = img.getPixel(root->upperleft.first + i, root->upperleft.second);
       *currPixel = root->avg;
     }
-
+  
     for (int i = 0; i < root->height; i++) {
       HSLAPixel* currPizel = img.getPixel(root->upperleft.first, root->upperleft.second + i);
       *currPizel = root->avg;
     }
   }
 
-  RenderNode(img, root->A);
-  RenderNode(img, root->B);
+  ColorImage(img, root->A);
+  ColorImage(img, root->B);
 
+}
+
+int CountNodes(Node* root) {
+  if (root == NULL) {
+    return 0;
+  } else {
+    return 1 + CountNodes(root->A) + CountNodes(root->B);
+  }
+}
+
+int CountLeaves(Node* root) {
+  if (root == NULL) {
+    return 0;
+  }
+
+  if (root->A == NULL && root->B == NULL) {
+    return 1;
+  } else {
+    return CountLeaves(root->A) + CountLeaves(root->B);
+  }
 }
