@@ -90,8 +90,8 @@ Node* PTree::BuildNode(PNG& im, pair<unsigned int, unsigned int> ul, unsigned in
   double sumS = 0;
   double sumL = 0;
   double sumA = 0;
-  for (int x = ul.first; x < ul.first + w; x++) {
-    for (int y = ul.second; y < ul.second + h; y++) {
+  for (unsigned int x = ul.first; x < ul.first + w; x++) {
+    for (unsigned int y = ul.second; y < ul.second + h; y++) {
       sumHX += Deg2X(im.getPixel(x, y)->h);
       sumHY += Deg2Y(im.getPixel(x, y)->h);
       sumS += im.getPixel(x, y)->s;
@@ -398,12 +398,12 @@ void ColorImage(PNG& img, Node* root) {
   }
    // POTENTIALLY WILL HAVE TO CHECK IF THIS GOES OVER WIDTH OR HEIGHT PROBABLY SHOULDNT THO
   if (root->A == NULL && root->B == NULL) {
-    for (int i = 0; i < root->width; i++) {
+    for (unsigned int i = 0; i < root->width; i++) {
       HSLAPixel* currPixel = img.getPixel(root->upperleft.first + i, root->upperleft.second);
       *currPixel = root->avg;
     }
   
-    for (int i = 0; i < root->height; i++) {
+    for (unsigned int i = 0; i < root->height; i++) {
       HSLAPixel* currPizel = img.getPixel(root->upperleft.first, root->upperleft.second + i);
       *currPizel = root->avg;
     }
