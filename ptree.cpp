@@ -349,3 +349,85 @@ void PTree::Copy(const PTree& other, Node* curr, Node* other_curr) {
     Copy(other, curr->B, other_curr->B);
   }
 }
+
+bool PTree::Prunable(Node* node, double tolerance) {
+  if (node == NULL) {
+    return true;
+  }
+
+  if (node->avg.dist(node->avg) <= tolerance) {
+    return true && Prunable(node->A, tolerance) && Prunable(node->B, tolerance);
+  } else {
+    return false;
+  }
+}
+
+void PTree::PruneNodes(Node* node) {
+  if (node == NULL) {
+    return;
+  }
+
+  if (node->A != NULL || node->B != NULL) {
+    PruneNodes(node->A);
+    PruneNodes(node->B);
+  }
+
+  free(node);
+  node = NULL;
+}
+
+void PTree::PruneSubtree(Node* root, double tolerance) {
+  if (root == NULL) {
+    return;
+  }
+
+  if (Prunable(root, tolerance)) {
+    PruneNodes(root->A);
+    PruneNodes(root->B);
+  } else {
+    PruneSubtree(root->A, tolerance);
+    PruneSubtree(root->B, tolerance);
+  }
+}
+
+void PTree::ColorImage(PNG& img, Node* root) const {
+  if (root == NULL) {
+    return;
+  }
+   // POTENTIALLY WILL HAVE TO CHECK IF THIS GOES OVER WIDTH OR HEIGHT PROBABLY SHOULDNT THO
+  if (root->A == NULL && root->B == NULL) {
+    for (int i = 0; i < root->width; i++) {
+      HSLAPixel* currPixel = img.getPixel(root->upperleft.first + i, root->upperleft.second);
+      *currPixel = root->avg;
+    }
+  
+    for (int i = 0; i < root->height; i++) {
+      HSLAPixel* currPizel = img.getPixel(root->upperleft.first, root->upperleft.second + i);
+      *currPizel = root->avg;
+    }
+  }
+
+  ColorImage(img, root->A);
+  ColorImage(img, root->B);
+
+}
+
+int PTree::CountNodes(Node* root) const {
+  if (root == NULL) {
+    return 0;
+  } else {
+    return 1 + CountNodes(root->A) + CountNodes(root->B);
+  }
+}
+
+int PTree::CountLeaves(Node* root) const {
+  if (root == NULL) {
+    return 0;
+  }
+
+  if (root->A == NULL && root->B == NULL) {
+    return 1;
+  } else {
+    return CountLeaves(root->A) + CountLeaves(root->B);
+  }
+}
