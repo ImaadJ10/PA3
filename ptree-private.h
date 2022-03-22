@@ -40,7 +40,4 @@ void PruneSubtree(Node* root, double tolerance);
 //TODO
 bool Prunable(Node* node, double tolerance);
 
-//TODO
-void PruneNodes(Node* node);
-
 #endif

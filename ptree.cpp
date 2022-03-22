@@ -418,45 +418,38 @@ int PTree::CountLeaves(Node* root) const {
   }
 }
 
-//TODO
-void PTree::PruneSubtree(Node* root, double tolerance) {
-  if (root == NULL) {
+// TODO
+void PTree::PruneSubtree(Node* node, double tolerance) {
+  if (node == NULL) {
     return;
   }
 
-  if (Prunable(root, tolerance)) {
-    PruneNodes(root->A);
-    PruneNodes(root->B);
+  if (Prunable(node->avg, node, tolerance)) {
+    // Need to figure this function out
   } else {
-    PruneSubtree(root->A, tolerance);
-    PruneSubtree(root->B, tolerance);
+    PruneSubtree(node->A, tolerance);
+    PruneSubtree(node->B, tolerance);
   }
 }
 
 // TODO
-bool PTree::Prunable(Node* node, double tolerance) {
+bool PTree::Prunable(HSLAPixel rootAvg, Node* node, double tolerance) {
   if (node == NULL) {
     return true;
   }
 
-  if (node->avg.dist(node->avg) <= tolerance) {
-    return true && Prunable(node->A, tolerance) && Prunable(node->B, tolerance);
-  } else {
+  if (node->A != NULL && rootAvg.dist(node->A->avg) > tolerance) {
     return false;
   }
-}
 
-// TODO
-void PTree::PruneNodes(Node* node) {
-  if (node == NULL) {
-    return;
+  if (node->B != NULL && rootAvg.dist(node->B->avg) > tolerance) {
+    return false;
   }
 
-  if (node->A != NULL || node->B != NULL) {
-    PruneNodes(node->A);
-    PruneNodes(node->B);
+  if (!Prunable(rootAvg, node->A, tolerance) || !Prunable(rootAvg, node->B, tolerance)) {
+    return false;
   }
 
-  free(node);
-  node = NULL;
+  return true;
 }
+
