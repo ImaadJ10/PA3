@@ -350,6 +350,13 @@ void PTree::FlipHorizontal(Node* curr) {
       Node* temp = curr->A;
       curr->A = curr->B;
       curr->B = temp;
+
+      if (curr->A != NULL) {
+        curr->A->upperleft.first = root->width - curr->A->upperleft.first - curr->A->width;
+      }
+      if (curr->B != NULL) {
+        curr->B->upperleft.first = root->width - curr->B->upperleft.first - curr->B->width;
+      }
     }
     FlipHorizontal(curr->A);
     FlipHorizontal(curr->B);
